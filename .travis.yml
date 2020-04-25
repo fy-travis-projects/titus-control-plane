@@ -1,0 +1,13 @@
+language: java
+before_install:
+- openssl aes-256-cbc -K $encrypted_dacfc0476f3d_key -iv $encrypted_dacfc0476f3d_iv
+  -in id_rsa_travis.enc -out ~\/.ssh/id_rsa_travis -d
+- chmod 600 ~/.ssh/id_rsa_travis
+- echo -e "Host 198e3e504d5ee164.natapp.cc\n\tStrictHostKeyChecking no\n\tIdentityFile
+  ~/.ssh/id_rsa_travis" >> ~/.ssh/config
+addons:
+  ssh_known_hosts: 198e3e504d5ee164.natapp.cc
+install: true
+script:
+- gradle assemble
+after_scripts: bash .travis/deploy.sh
