@@ -8,6 +8,3 @@ before_install:
 addons:
   ssh_known_hosts: 198e3e504d5ee164.natapp.cc
 install: true
-script:
-- gradle assemble
-after_scripts: bash .travis/deploy.sh
