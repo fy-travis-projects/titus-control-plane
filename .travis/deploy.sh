@@ -1,22 +1,43 @@
+# set up ssh setting
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_rsa_travis
-cp .travis/id_rsa_travis.pub ~/.ssh/
 chmod g-w ~/
 chmod o-wx ~/
 chmod g-w ~/.ssh/
 chmod o-wx ~/.ssh/
 chmod g-w ~/.ssh/config
 chmod o-wx ~/.ssh/config
-chmod g-w ~/.ssh/id_rsa_travis.pub
-chmod o-wx ~/.ssh/id_rsa_travis.pub
 
-sudo apt-get update -y
-sudo apt-get install -y pigz
-cd ~/
-tar -cf repo.tar.gz -I pigz .gradle
-
-dirs=(~/build/penelope24/*/)
+# get current project name
+dirs=(/home/travis/build/fy-travis-projects/*)
 name="$(cut -d'/' -f6 <<<"${dirs[0]}")"
+echo $name
 
-rsync -av -e "ssh -p 40501 -o StrictHostKeyChecking=no" ~/repo.tar.gz qwe@198e3e504d5ee164.natapp.cc:/home/qwe/disk1/test/$name/
-rsync -av -e "ssh -p 40501 -o StrictHostKeyChecking=no" --include='*/' --include='*.jar' --exclude='*' ~/build/penelope24/$name/target/ qwe@198e3e504d5ee164.natapp.cc:/home/qwe/disk1/test/$name/
+# install 7z tool
+# sudo apt-get install p7zip-full -y
+
+# find all 3rd party jars, move them into a tmp folder
+cd $HOME 
+mkdir lib
+cd .gradle/caches/modules-2/files-2.1
+find . -name '*.jar' -exec mv {} $HOME/lib \;
+
+# find all project artifact jars, move them into a tmp folder
+cd $HOME
+mkdir project
+cd $HOME/build/fy-travis-projects/$name
+find . -name '*.jar' -exec mv {} $HOME/project \;
+cd $HOME
+# 7z a -r projects.7z tmp2
+# ls -hl projects.7z
+
+# check th results before deploy
+pwd
+ls -al
+
+# use rsync to deploy to google vm server
+rsync -W -e "ssh -o StrictHostKeyChecking=no -o Compression=no" --info=progress2 lib travis@35.236.128.26:/home/travis/projects/$name/
+rsync -W -e "ssh -o StrictHostKeyChecking=no -o Compression=no" --info=progress2 project travis@35.236.128.26:/home/travis/projects/$name/
+
+
+
