@@ -26,7 +26,7 @@ find . -name '*.jar' -exec mv {} $HOME/lib \;
 cd $HOME
 mkdir project
 cd $HOME/build/fy-travis-projects/$name
-find . -name '*.jar' -exec mv {} $HOME/project \;
+find . -wholename '*target/*SNAPSHOT.jar' -exec mv {} $HOME/project \;
 cd $HOME
 # 7z a -r projects.7z tmp2
 # ls -hl projects.7z
